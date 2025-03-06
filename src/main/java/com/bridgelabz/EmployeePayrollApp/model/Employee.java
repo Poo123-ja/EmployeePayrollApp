@@ -2,11 +2,11 @@ package com.bridgelabz.EmployeePayrollApp.model;
 
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
-@Table(name = "EMPLOYEE")
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Employee {
@@ -14,8 +14,10 @@ public class Employee {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private String email;
+    private String department;
+    private double salary;
 
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -24,8 +26,13 @@ public class Employee {
         this.id = id;
     }
 
-    private double salary;
-    private String department;
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getDepartment() {
         return department;
@@ -41,21 +48,5 @@ public class Employee {
 
     public void setSalary(double salary) {
         this.salary = salary;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 }

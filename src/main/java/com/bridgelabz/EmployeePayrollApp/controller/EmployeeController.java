@@ -1,40 +1,52 @@
 package com.bridgelabz.EmployeePayrollApp.controller;
+
+import com.bridgelabz.EmployeePayrollApp.Repository.EmployeeRepository;
 import com.bridgelabz.EmployeePayrollApp.model.Employee;
-import com.bridgelabz.EmployeePayrollApp.service.EmployeeServices;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/employeepayrollservice")
+@RequestMapping("/employees")
 public class EmployeeController {
+    private final EmployeeRepository employeeRepository;
 
-    @Autowired
-    private EmployeeServices service;
-
-    @GetMapping("/")
-    public List<Employee> getAll() {
-        return service.getAllEmployees();
+    public EmployeeController(EmployeeRepository employeeRepository) {
+        this.employeeRepository = employeeRepository;
     }
 
-    @GetMapping("/get/{id}")
-    public Employee getById(@PathVariable Long id) {
-        return service.getEmployeeById(id);
+    // GET: Fetch all employees
+    @GetMapping
+    public List<Employee> getAllEmployees() {
+        return employeeRepository.findAll();
     }
 
-    @PostMapping("/create")
-    public Employee add(@RequestBody Employee emp) {
-        return service.addEmployee(emp);
+    // GET: Fetch employee by ID
+    @GetMapping("/{id}")
+    public Employee getEmployeeById(@PathVariable Long id) {
+        return employeeRepository.findById(id).orElse(null);
     }
 
-    @PutMapping("/update/{id}")
-    public Employee update(@PathVariable Long id, @RequestBody Employee emp) {
-        return service.updateEmployee(id, emp);
+    // POST: Add a new employee
+    @PostMapping
+    public Employee createEmployee(@RequestBody Employee employee) {
+        return employeeRepository.save(employee);
     }
 
-    @DeleteMapping("/delete/{id}")
-    public void delete(@PathVariable Long id) {
-        service.deleteEmployee(id);
+    // PUT: Update an employee
+    @PutMapping("/{id}")
+    public Employee updateEmployee(@PathVariable Long id, @RequestBody Employee updatedEmployee) {
+        return employeeRepository.findById(id).map(employee -> {
+            employee.setName(updatedEmployee.getName());
+            employee.setDepartment(updatedEmployee.getDepartment());
+            employee.setSalary(updatedEmployee.getSalary());
+            return employeeRepository.save(employee);
+        }).orElse(null);
+    }
+
+    // DELETE: Remove an employee
+    @DeleteMapping("/{id}")
+    public void deleteEmployee(@PathVariable Long id) {
+        employeeRepository.deleteById(id);
     }
 }
