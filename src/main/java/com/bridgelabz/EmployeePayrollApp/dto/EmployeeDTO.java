@@ -1,27 +1,39 @@
 
 package com.bridgelabz.EmployeePayrollApp.dto;
 
-import lombok.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
-
-import lombok.Data;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Pattern;
-
-@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class EmployeeDTO {
-
-    private String department;
-
-    @NotEmpty(message = "Employee name cannot be empty")
-    @Pattern(regexp = "^[A-Z]{1}[a-zA-Z\\s]{2,}$", message = "Employee name Invalid")
+    @NotBlank(message = "Name cannot be empty")
     private String name;
 
+    public String getName() {
+        return name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public double getSalary() {
+        return salary;
+    }
+
+    public String getDepartment() {
+        return department;
+    }
+
+    @Email
+    private String email;
+
+    @NotBlank(message = "Salary Cannot be Empty")
     private double salary;
 
-    public EmployeeDTO(String department, String name, double salary) {
-        this.department = department;
-        this.name = name;
-        this.salary = salary;
-    }
+    @NotBlank(message = "Department cannot be empty")
+    private String department;
 }

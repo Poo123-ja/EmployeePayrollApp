@@ -1,57 +1,75 @@
+
 package com.bridgelabz.EmployeePayrollApp.controller;
 
 
-
+import com.bridgelabz.EmployeePayrollApp.dto.EmployeeDTO;
+import com.bridgelabz.EmployeePayrollApp.exception.EmployeeNotFoundException;
 import com.bridgelabz.EmployeePayrollApp.model.Employee;
-import com.bridgelabz.EmployeePayrollApp.service.EmployeeService;
-import lombok.extern.slf4j.Slf4j;
+import com.bridgelabz.EmployeePayrollApp.service.EmployeeServiceInterface;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 
-import jakarta.validation.Valid;
 import java.util.List;
-import java.util.Optional;
 
-@Slf4j  // Enables logging
 @RestController
-@Validated  // Enables method-level validation
-@RequestMapping("/employees")
+@RequestMapping("/employeepayrollservice")
 public class EmployeeController {
-    private final EmployeeService employeeService;
+
+    private static final Logger logger = LoggerFactory.getLogger(EmployeeController.class);
 
     @Autowired
-    public EmployeeController(EmployeeService employeeService) {
-        this.employeeService = employeeService;
+    EmployeeServiceInterface employeeServiceInterface;
+
+    @GetMapping("/")
+    public ResponseEntity<List<Employee>> getAll() {
+        logger.info("Fetching all employees...");
+        List<Employee> employees = employeeServiceInterface.getAllEmployees();
+        logger.info("Total employees retrieved: {}", employees.size());
+        return ResponseEntity.ok(employees);
     }
 
-    // GET: Fetch all employees
-    @GetMapping
-    public List<Employee> getAllEmployees() {
-        return employeeService.getAllEmployees();
+    @GetMapping("/get/{id}")
+    public ResponseEntity<Employee> getById(@PathVariable Long id) {
+        logger.info("Fetching employee with ID: {}", id);
+        Employee employee = employeeServiceInterface.getEmployeeById(id);
+        if (employee != null) {
+            logger.info("Employee found: {}", employee);
+            return ResponseEntity.ok(employee);
+        } else {
+            logger.warn("Employee with ID {} not found!", id);
+            throw new EmployeeNotFoundException("Employee with ID " + id + " not found");
+        }
     }
 
-    // GET: Fetch employee by ID
-    @GetMapping("/{id}")
-    public Optional<Employee> getEmployeeById(@PathVariable Long id) {
-        return employeeService.getEmployeeById(id);
+    @PostMapping("/create")
+    public ResponseEntity<Employee> add(@RequestBody EmployeeDTO emp) {
+        logger.info("Adding new employee: {}", emp);
+        Employee employee = employeeServiceInterface.addEmployee(emp);
+        logger.info("Employee added successfully with ID: {}", employee.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(employee);
     }
 
-    // POST: Add a new employee
-    @PostMapping
-    public Employee createEmployee(@Valid @RequestBody Employee employee) {
-        return employeeService.createEmployee(employee);
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Employee> update(@PathVariable Long id, @RequestBody EmployeeDTO emp) {
+        logger.info("Updating employee with ID: {}", id);
+        Employee updatedEmployee = employeeServiceInterface.updateEmployee(id, emp);
+        if (updatedEmployee == null) {
+            logger.warn("Employee with ID {} not found for update!", id);
+            throw new EmployeeNotFoundException("Employee with ID " + id + " not found");
+        }
+        logger.info("Employee updated: {}", updatedEmployee);
+        return ResponseEntity.ok(updatedEmployee);
     }
 
-    // PUT: Update an employee
-    @PutMapping("/{id}")
-    public Optional<Employee> updateEmployee(@PathVariable Long id, @RequestBody Employee updatedEmployee) {
-        return employeeService.updateEmployee(id, updatedEmployee);
-    }
-
-    // DELETE: Remove an employee
-    @DeleteMapping("/{id}")
-    public void deleteEmployee(@PathVariable Long id) {
-        employeeService.deleteEmployee(id);
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> delete(@PathVariable Long id) {
+        logger.warn("Deleting employee with ID: {}", id);
+        employeeServiceInterface.deleteEmployee(id);
+        logger.info("Employee with ID {} deleted successfully", id);
+        return ResponseEntity.ok("Employee deleted successfully!");
     }
 }
